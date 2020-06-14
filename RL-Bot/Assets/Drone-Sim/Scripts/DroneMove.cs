@@ -38,6 +38,9 @@ public class DroneMove : MonoBehaviour
             {
                 liftVelocity = liftVelocityCap;
             }
+        }else
+        {
+            liftVelocity = 0;
         }
 
         if (forward)
@@ -47,15 +50,16 @@ public class DroneMove : MonoBehaviour
             {
                 moveVelocity = moveVelocityCap;
             }
-        }
-
-        if (backward)
+        }else if (backward)
         {
             moveVelocity = moveVelocity - speedFactor;
             if (moveVelocity < -1 * moveVelocityCap)
             {
                 moveVelocity = -1 * moveVelocityCap;
             }
+        }else
+        {
+            moveVelocity = 0;
         }
 
         if (rotateLeft)
@@ -65,38 +69,20 @@ public class DroneMove : MonoBehaviour
             {
                 rotateVelocity = -1 * rotateVelocityCap;
             }
-        }
-
-        if (rotateRight)
+        }else if (rotateRight)
         {
             rotateVelocity = rotateVelocity + 100 * speedFactor;
             if (rotateVelocity > rotateVelocityCap)
             {
                 rotateVelocity = rotateVelocityCap;
             }
+        }else
+        {
+            rotateVelocity = 0;
         }
 
         transform.Translate(new Vector3(moveVelocity, liftVelocity, 0) * Time.deltaTime);
         transform.Rotate(new Vector3(0, rotateVelocity, 0) * Time.deltaTime);
 
-        if (liftVelocity > 0)
-        {
-            liftVelocity = liftVelocity - (float)0.1;
-        }
-        if (moveVelocity < 0) {
-            moveVelocity = moveVelocity + (float)0.1;
-        }
-        if (moveVelocity > 0)
-        {
-            moveVelocity = moveVelocity - (float)0.1;
-        }
-        if (rotateVelocity < 0)
-        {
-            rotateVelocity = rotateVelocity + (float)0.1;
-        }
-        if (moveVelocity > 0)
-        {
-            rotateVelocity = rotateVelocity - (float)0.1;
-        }
     }
 }
