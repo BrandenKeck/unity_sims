@@ -11,7 +11,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{D7DC8D46-823E-8357-0E05-530DFF67E3C6}</ProjectGuid>
+    <ProjectGuid>{C784D6FC-5EF2-6E17-65CB-CD262BB51F5D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -62,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Drone-Sim\Scripts\DroneMove.cs" />
     <Compile Include="Assets\Roll-a-Ball\Scripts\CameraMove.cs" />
     <Compile Include="Assets\Roll-a-Ball\Scripts\GameExit.cs" />
     <Compile Include="Assets\Roll-a-Ball\Scripts\GameReset.cs" />
@@ -597,70 +598,70 @@
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.0f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/System.Xml.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Cinemachine">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Cinemachine.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Cinemachine.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.ProBuilder.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.ProBuilder.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Polybrush">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.Polybrush.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Polybrush.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Polybrush.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.Polybrush.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Polybrush.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.ProBuilder.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.ProBuilder.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder.AssetIdRemapUtility">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.ProBuilder.AssetIdRemapUtility.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.ProBuilder.AssetIdRemapUtility.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.Postprocessing.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Postprocessing.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Sprite.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Tilemap.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll</HintPath>
     </Reference>
     <Reference Include="com.unity.cinemachine.editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/com.unity.cinemachine.editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/com.unity.cinemachine.editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualStudio.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.VisualStudio.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.VisualStudio.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder.AddOns.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.ProBuilder.AddOns.Editor.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.ProBuilder.AddOns.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup></ItemGroup>
