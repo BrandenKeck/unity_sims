@@ -1,0 +1,1 @@
+C:\Users\kril\Desktop\_files\_2018-Present\Development\UnityDev\Q-Learning\Q-Bot\obj\Debug\Assembly-CSharp.csprojResolveAssemblyReference.cache

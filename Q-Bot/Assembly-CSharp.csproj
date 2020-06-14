@@ -62,7 +62,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Roll-a-Ball\Scripts\MovePlayer.cs" />
+    <Compile Include="Assets\Roll-a-Ball\Scripts\CameraMove.cs" />
+    <Compile Include="Assets\Roll-a-Ball\Scripts\GameExit.cs" />
+    <Compile Include="Assets\Roll-a-Ball\Scripts\GameReset.cs" />
+    <Compile Include="Assets\Roll-a-Ball\Scripts\PickUpRotator.cs" />
+    <Compile Include="Assets\Roll-a-Ball\Scripts\PlayerCollision.cs" />
+    <Compile Include="Assets\Roll-a-Ball\Scripts\PlayerMove.cs" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.0f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
