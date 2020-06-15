@@ -62,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Drone-Sim\Scripts\DroneExit.cs" />
     <Compile Include="Assets\Drone-Sim\Scripts\DroneMove.cs" />
     <Compile Include="Assets\Roll-a-Ball\Scripts\CameraMove.cs" />
     <Compile Include="Assets\Roll-a-Ball\Scripts\GameExit.cs" />

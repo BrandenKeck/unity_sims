@@ -1,12 +1,8 @@
 ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
-    - CameraMove
-    - GameExit
-    - GameReset
-    - PickUpRotator
-    - PlayerCollision
-    - PlayerMove
+    - DroneExit
+    - DroneMove
     Unity.2D.Tilemap.Editor.dll:
     - UnityEditor.Tilemaps.GridPaintingState
     - UnityEditor.Tilemaps.GridPaletteBrushes
@@ -32,7 +28,7 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.GraphicRaycaster
     - UnityEngine.UI.Text
   sceneClasses:
-    Assets/Roll-a-Ball/Scenes/main.unity:
+    Assets/Drone-Sim/Scenes/forest1.unity:
     - Class: 1
       Script: {instanceID: 0}
     - Class: 4
@@ -55,8 +51,6 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 54
       Script: {instanceID: 0}
-    - Class: 64
-      Script: {instanceID: 0}
     - Class: 65
       Script: {instanceID: 0}
     - Class: 81
@@ -66,44 +60,42 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 11300}
+      Script: {instanceID: 11292}
     - Class: 114
-      Script: {instanceID: 11604}
+      Script: {instanceID: 11322}
     - Class: 114
-      Script: {instanceID: 12332}
+      Script: {instanceID: 11600}
     - Class: 114
-      Script: {instanceID: 13912}
+      Script: {instanceID: 12334}
     - Class: 114
-      Script: {instanceID: 14516}
+      Script: {instanceID: 13916}
     - Class: 114
-      Script: {instanceID: 27830}
+      Script: {instanceID: 14522}
     - Class: 114
-      Script: {instanceID: 28420}
-    - Class: 114
-      Script: {instanceID: 28796}
-    - Class: 114
-      Script: {instanceID: 29738}
-    - Class: 114
-      Script: {instanceID: 32180}
-    - Class: 114
-      Script: {instanceID: 32280}
-    - Class: 114
-      Script: {instanceID: 35050}
+      Script: {instanceID: 19260}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
       Script: {instanceID: 0}
     - Class: 135
       Script: {instanceID: 0}
+    - Class: 154
+      Script: {instanceID: 0}
+    - Class: 156
+      Script: {instanceID: 0}
     - Class: 157
       Script: {instanceID: 0}
     - Class: 196
+      Script: {instanceID: 0}
+    - Class: 218
       Script: {instanceID: 0}
     - Class: 222
       Script: {instanceID: 0}
     - Class: 223
       Script: {instanceID: 0}
     - Class: 224
+      Script: {instanceID: 0}
+    - Class: 1953259897
       Script: {instanceID: 0}
   scriptHashData:
   - hash:
@@ -132,6 +124,12 @@ ScriptsOnlyBuild:
     className: ColorGrading
   - hash:
       serializedVersion: 2
+      Hash: 9060d580c4e29979c669b5dc2312c134
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: DroneMove
+  - hash:
+      serializedVersion: 2
       Hash: b13de7a0a457cb8e026d4237dc1b5797
     assemblyName: Unity.Postprocessing.Runtime.dll
     namespaceName: UnityEngine.Rendering.PostProcessing
@@ -154,6 +152,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.TextMeshPro.dll
     namespaceName: TMPro
     className: TMP_Dropdown
+  - hash:
+      serializedVersion: 2
+      Hash: 83e769eee07fc231384c812eedbb8224
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: CameraMove
   - hash:
       serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
@@ -276,6 +280,12 @@ ScriptsOnlyBuild:
     className: PolyShape
   - hash:
       serializedVersion: 2
+      Hash: afc5b93a7b192de2dcb3832fe35a5c7e
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: PlayerMove
+  - hash:
+      serializedVersion: 2
       Hash: 7ab0e790220bdca831fdd886b339039d
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
@@ -336,10 +346,22 @@ ScriptsOnlyBuild:
     className: PhysicsRaycaster
   - hash:
       serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: PickUpRotator
+  - hash:
+      serializedVersion: 2
       Hash: e82c0521cdfe8cb6a168ef7208a98d4a
     assemblyName: Unity.Postprocessing.Runtime.dll
     namespaceName: UnityEngine.Rendering.PostProcessing
     className: Vignette
+  - hash:
+      serializedVersion: 2
+      Hash: 8cc8829e2212c1d8f69bc857c09d0182
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GameReset
   - hash:
       serializedVersion: 2
       Hash: 36f96c190e244321e128769d9c5120ac
@@ -738,6 +760,12 @@ ScriptsOnlyBuild:
     className: Entity
   - hash:
       serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GameExit
+  - hash:
+      serializedVersion: 2
       Hash: 6225eb0973ab0af667bc5f9d1b1b18de
     assemblyName: Cinemachine.dll
     namespaceName: Cinemachine
@@ -790,6 +818,12 @@ ScriptsOnlyBuild:
     assemblyName: Cinemachine.dll
     namespaceName: Cinemachine
     className: CinemachineHardLookAt
+  - hash:
+      serializedVersion: 2
+      Hash: dfd9ee0563efbcbfff8d6b5404b8c24b
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: PlayerCollision
   - hash:
       serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
@@ -948,41 +982,11 @@ ScriptsOnlyBuild:
     className: PlayableTrack
   - hash:
       serializedVersion: 2
-      Hash: afc5b93a7b192de2dcb3832fe35a5c7e
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: PlayerMove
-  - hash:
-      serializedVersion: 2
-      Hash: 83e769eee07fc231384c812eedbb8224
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: CameraMove
-  - hash:
-      serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: PickUpRotator
-  - hash:
-      serializedVersion: 2
-      Hash: dfd9ee0563efbcbfff8d6b5404b8c24b
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: PlayerCollision
-  - hash:
-      serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: GameExit
-  - hash:
-      serializedVersion: 2
-      Hash: 8cc8829e2212c1d8f69bc857c09d0182
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: GameReset
+    className: DroneExit
   platform: 5
   scenePathNames:
-  - Assets/Roll-a-Ball/Scenes/main.unity
-  playerPath: C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/Q-Learning/Q-Bot/Builds/Roll-a-Ball/Q-Bot.exe
+  - Assets/Drone-Sim/Scenes/forest1.unity
+  playerPath: C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Builds/Drone-Sim/forest1/Q-Bot.exe
