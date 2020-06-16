@@ -59,3 +59,14 @@ The following packages were added:
   com.unity.polybrush@1.0.1
   com.unity.postprocessing@2.3.0
   com.unity.probuilder@4.2.3
+
+=== Mon Jun 15 21:28:14 2020
+
+Packages were changed.
+Update Mode: mergeDefaultDependencies
+
+The following packages were added:
+  com.unity.ads@2.0.8
+  com.unity.analytics@3.3.2
+  com.unity.package-manager-ui@2.1.2
+  com.unity.purchasing@2.0.6
