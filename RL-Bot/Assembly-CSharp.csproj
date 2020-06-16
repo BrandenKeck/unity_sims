@@ -254,14 +254,14 @@
     <Reference Include="UnityEditor">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.0f1/Editor/Data/Managed/UnityEditor.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Analytics.Tracker">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/PackageCache/com.unity.analytics@3.3.2/Unity.Analytics.Tracker.dll</HintPath>
+    <Reference Include="Unity.Analytics.Editor">
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/PackageCache/com.unity.analytics@3.3.2/Unity.Analytics.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.StandardEvents">
       <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/PackageCache/com.unity.analytics@3.3.2/Unity.Analytics.StandardEvents.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Analytics.Editor">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/PackageCache/com.unity.analytics@3.3.2/Unity.Analytics.Editor.dll</HintPath>
+    <Reference Include="Unity.Analytics.Tracker">
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/PackageCache/com.unity.analytics@3.3.2/Unity.Analytics.Tracker.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.0f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
@@ -677,11 +677,11 @@
     <Reference Include="Unity.TerrainTools.Editor">
       <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.TerrainTools.Editor.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEditor.UI">
-      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Analytics.DataPrivacy">
       <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.UI">
+      <HintPath>C:/Users/kril/Desktop/_files/_2018-Present/Development/UnityDev/RL-Learning/RL-Bot/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup></ItemGroup>
