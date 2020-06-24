@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Drone-Sim/Scenes/forest1.unity
+- path: Assets/Roll-a-Ball/Scenes/user_controlled_with_rotation.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

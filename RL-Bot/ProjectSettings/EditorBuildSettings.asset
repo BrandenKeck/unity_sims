@@ -6,9 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Roll-a-Ball/Scenes/main.unity
+    path: Assets/Roll-a-Ball/Scenes/user_controlled_basic.unity
     guid: 358ba7f4688f3584699b7aaba9bbbbab
-  - enabled: 1
+  - enabled: 0
     path: Assets/Drone-Sim/Scenes/forest1.unity
     guid: ddd4305cb168279438c9170fab55761d
+  - enabled: 1
+    path: Assets/Roll-a-Ball/Scenes/user_controlled_with_rotation.unity
+    guid: 0227f8bfab60d304da56428d80161115
   m_configObjects: {}

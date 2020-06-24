@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class GameReset : MonoBehaviour
 {
 
+    public string sceneName;
     public float timeLimit = 90;
     public int winCount = 8;
     public Text timerText;
@@ -52,12 +53,12 @@ public class GameReset : MonoBehaviour
         if (count >= winCount)
         {
             PlayerPrefs.SetInt("Wins", wins + 1);
-            SceneManager.LoadScene("main");
+            SceneManager.LoadScene(sceneName);
         }
         if (timeRemaining <= 0)
         {
             PlayerPrefs.SetInt("Losses", losses + 1);
-            SceneManager.LoadScene("main");
+            SceneManager.LoadScene(sceneName);
         }
 
     }
