@@ -1,4 +1,8 @@
-# Import game
+# Change system directory
+import sys
+sys.path.append("../../..")
+
+# Import Game
 from gridworld import world
 
 # Create game instance

@@ -21,10 +21,12 @@ class world():
         # Reinforcement Learning Parameters
         self.alpha = 0.1 ## Learning rate / step size
         self.gamma = 0.1 ## Discount Factor on Returns
+        self.episode_count = 0 ## Number of completed episodes
 
         # Penalties and Rewards
         self.goal_reward = 0
         self.goal_gradient_reward_factor = 0
+        self.goal_caught_penalty = 0
         self.team_goal_reward = 0
         self.opponent_goal_penalty = 0
         self.border_collide_penalty = 0
@@ -75,7 +77,7 @@ class world():
                     self.goal_rewards_gradient = self.get_goal_rewards_gradient()
 
             # Perform learning functions and enact policy
-            self.simulate_action()
+            self.simulate_action(False)
 
             # Draw objects
             self.draw(window)
@@ -95,10 +97,33 @@ class world():
     Agents should be trainable outside of pygame sim
     '''
     def train_agents(self, num_episodes):
-        ticker = -1
-        pass
 
-    def simulate_action(self):
+        # Output info to command line:
+        print("Training Agents...:  ")
+        print("Required Episode Completions:  " + str(num_episodes))
+
+        # get initial rewards gradient
+        self.goal_rewards_gradient = self.get_goal_rewards_gradient()
+
+        self.episode_count = 0
+        while self.episode_count < num_episodes:
+
+            # Check if new rewards gradient is needed
+            # If so, recalculate the gradient list
+            if self.movable_goals:
+                check_movement = False
+                for g in self.goals:
+                    if g.x != g.init_x or g.y != g.init_y:
+                        check_movement = True
+
+                if check_movement:
+                    self.goal_rewards_gradient = self.get_goal_rewards_gradient()
+
+            # Simulate
+            self.simulate_action(True)
+
+
+    def simulate_action(self, quickact):
         if self.update_ready():
             for p in self.players:
             
@@ -111,10 +136,6 @@ class world():
                 # Call Learning Functions for Agent
                 p.learn(self.get_current_state(p.x, p.y), self.alpha, self.gamma)
                 p.act(self.get_current_state(p.x, p.y))
-
-                '''DEBUG - REMOVE'''
-                if len(p.rewards) > 0:
-                    print(p.policies[p.prev_state])
 
                 # Border Collision Penalty
                 if p.target_x < 0 or p.target_x >= self.xsize:
@@ -160,6 +181,8 @@ class world():
                                 pp.rewards.append(self.opponent_goal_penalty)
 
                         self.reset()
+                        self.episode_count = self.episode_count + 1
+                        print("Completed Episodes:  " + str(self.episode_count))
                         return
 
                 # Add a reward based on improvement in position
@@ -174,7 +197,10 @@ class world():
 
         # Execute movement animation
         for p in self.players:
-            p.animate_move()
+            if quickact:
+                p.quick_move()
+            else:
+                p.animate_move()
 
     # Check that animations have completed for "Run" mode
     def update_ready(self):
@@ -219,6 +245,12 @@ class world():
 
         return ness
 
+    def set_player_team(self, name, team):
+        if team > 5: team = 5 ## TODO - ACTUAL ERROR HANDLING
+        for p in self.players:
+            if p.name == name:
+                p.team = team
+
     # Draw world objects
     def draw(self, window):
         for p in self.players:
@@ -241,16 +273,16 @@ class world():
     
     def set_discount_factor(self, val):
         self.gamma = val
-        
-    def set_greedy_probability(self, val):
-        self.epsilon = val
     
     def set_goal_reward(self, val):
         self.goal_reward = val
     
     def set_goal_gradient_reward_factor(self, val):
         self.goal_gradient_reward_factor = val
-        
+
+    def set_goal_caught_penalty(self, val):
+        self.goal_caught_penalty = val
+
     def set_team_goal_reward(self, val):
         self.team_goal_reward = val
         
@@ -338,7 +370,8 @@ class player():
             pol_sum = pol_sum + p
             cumprobs.append(pol_sum)
         
-        # Randomly (uniformly) chose an action if more than one possibility exists
+        # Randomly chose an action based on policy
+        action = policy.index(max(policy))
         diceroll = np.random.random(1)[0]
         for idx, c in enumerate(cumprobs):
             if diceroll <= c:
@@ -413,6 +446,13 @@ class player():
             return [], [], []
 
     # Purely asthetic function for animating the move of each agent
+    def quick_move(self):
+        self.x = self.target_x
+        self.y = self.target_y
+        self.pos_x = self.target_pos_x
+        self.pos_y = self.target_pos_y
+
+        # Purely asthetic function for animating the move of each agent
     def animate_move(self):
         if (self.pos_x != self.target_pos_x or self.pos_y != self.target_pos_y):
             self.pos_x = self.pos_x + np.sign(self.target_pos_x - self.pos_x)
@@ -430,7 +470,16 @@ class player():
 
     # Draw the agent on the board
     def draw(self, window):
-        pygame.draw.rect(window, (0,0,255), (self.pos_x, self.pos_y, 25, 25))
+        if self.team == 1:
+            pygame.draw.rect(window, (0,0,255), (self.pos_x, self.pos_y, 25, 25))
+        elif self.team == 2:
+            pygame.draw.rect(window, (255,0,0), (self.pos_x, self.pos_y, 25, 25))
+        elif self.team == 3:
+            pygame.draw.rect(window, (255,0,255), (self.pos_x, self.pos_y, 25, 25))
+        elif self.team == 4:
+            pygame.draw.rect(window, (255,255,0), (self.pos_x, self.pos_y, 25, 25))
+        elif self.team == 5:
+            pygame.draw.rect(window, (0,255,255), (self.pos_x, self.pos_y, 25, 25))
     
     # Set agent position to initial value
     def reset(self):
@@ -466,7 +515,7 @@ class goal():
         self.pos_y = 25*y
         self.target_pos_x = 25*x
         self.target_pos_y = 25*y
-    
+
     # Draw the goal
     def draw(self, window):
         pygame.draw.rect(window, (50, 255, 50), (self.pos_x, self.pos_y, 25, 25))
