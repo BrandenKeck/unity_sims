@@ -8,7 +8,7 @@ from gridworld import world
 # Create game instance
 thisWorld = world(20, 18)
 thisWorld.add_player("Player_1", 4, 2)
-thisWorld.add_goal(15, 15)
+thisWorld.add_goal("Goal_1", 15, 15)
 
 # Establish settings
 thisWorld.set_timestep_penalty(-1)

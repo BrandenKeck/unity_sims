@@ -10,7 +10,7 @@ thisWorld = world(15, 5)
 thisWorld.add_player("Player_1", 1, 2)
 thisWorld.add_player("Player_2", 13, 2)
 thisWorld.set_player_team("Player_2", 2)
-thisWorld.add_goal(7, 2)
+thisWorld.add_goal("Goal_1", 7, 2)
 
 # Establish settings
 thisWorld.set_timestep_penalty(-1)

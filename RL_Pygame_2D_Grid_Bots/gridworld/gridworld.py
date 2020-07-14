@@ -1,16 +1,19 @@
-import pygame, pickle
+# Standard Imports
+import pygame, sys, os
 import numpy as np
 
-'''
----------------------------
-ENVIRONMENT CLASS
-To be called by Run file
----------------------------
-'''
+# Class Imports
+import player, wall, spritesheet
 
+# World Class - Runs Simulations
 class world():
 
     def __init__(self, xsize, ysize):
+
+        # Image Properties
+        self.player_imgs = None
+        self.goal_imgs = None
+        self.wall_imgs = None
 
         # Dimensions of the board
         self.xsize = xsize
@@ -27,6 +30,7 @@ class world():
         self.goal_reward = 0
         self.goal_gradient_reward_factor = 0
         self.goal_caught_penalty = 0
+        self.goal_player_repulsion_factor = 0
         self.team_goal_reward = 0
         self.opponent_goal_penalty = 0
         self.border_collide_penalty = 0
@@ -44,6 +48,8 @@ class world():
         self.players = []
         self.goals = []
         self.goal_rewards_gradient = []
+        self.goal_repulsion_gradient = []
+        self.walls = []
     
     def run_game(self):
         
@@ -51,12 +57,14 @@ class world():
         pygame.init()
         window = pygame.display.set_mode((self.w, self.h))
         pygame.display.set_caption("gridworld")
+        self.set_images()
         
         # Initialize game state
         run = True
 
         # Calculate initial rewards gradient
         self.goal_rewards_gradient = self.get_goal_rewards_gradient()
+        self.goal_repulsion_gradient = self.get_goal_repulsion_gradient()
 
         # Start the game loop
         while run:
@@ -75,6 +83,7 @@ class world():
 
                 if check_movement:
                     self.goal_rewards_gradient = self.get_goal_rewards_gradient()
+                    self.goal_repulsion_gradient = self.get_goal_repulsion_gradient()
 
             # Perform learning functions and enact policy
             self.simulate_action(False)
@@ -92,18 +101,15 @@ class world():
 
         pygame.quit()
 
-    '''
-    Major TODO
-    Agents should be trainable outside of pygame sim
-    '''
     def train_agents(self, num_episodes):
 
         # Output info to command line:
-        print("Training Agents...:  ")
+        print("Training Agents...  ")
         print("Required Episode Completions:  " + str(num_episodes))
 
         # get initial rewards gradient
         self.goal_rewards_gradient = self.get_goal_rewards_gradient()
+        self.goal_repulsion_gradient = self.get_goal_repulsion_gradient()
 
         self.episode_count = 0
         while self.episode_count < num_episodes:
@@ -118,6 +124,7 @@ class world():
 
                 if check_movement:
                     self.goal_rewards_gradient = self.get_goal_rewards_gradient()
+                    self.goal_repulsion_gradient = self.get_goal_repulsion_gradient()
 
             # Simulate
             self.simulate_action(True)
@@ -133,7 +140,7 @@ class world():
                 # Store rewards gradient value of previous position
                 prev_gradient_value = self.goal_rewards_gradient[p.x][p.y]
 
-                # Call Learning Functions for Agent
+                # Call Learning Functions for Agents
                 p.learn(self.get_current_state(p.x, p.y), self.alpha, self.gamma)
                 p.act(self.get_current_state(p.x, p.y))
 
@@ -147,10 +154,13 @@ class world():
                     p.target_pos_y = p.pos_y
                     player_rewards = player_rewards + self.border_collide_penalty
 
-                '''
-                TODO
-                Penalty for "Wall" collisions
-                '''
+                for w in self.walls:
+                    if p.target_x == w.x and p.target_y == w.y:
+                        p.target_x = p.x
+                        p.target_y = p.y
+                        p.target_pos_x = p.pos_x
+                        p.target_pos_y = p.pos_y
+                        player_rewards = player_rewards + self.wall_collide_penalty
 
                 # Player Collision Rewards and Penalties
                 for pp in self.players:
@@ -180,9 +190,12 @@ class world():
                             elif pp != p and p.team != pp.team: 
                                 pp.rewards.append(self.opponent_goal_penalty)
 
+                        g.rewards.append(self.goal_caught_penalty)
+
                         self.reset()
                         self.episode_count = self.episode_count + 1
                         print("Completed Episodes:  " + str(self.episode_count))
+
                         return
 
                 # Add a reward based on improvement in position
@@ -195,6 +208,65 @@ class world():
                 # Update agent reward and previous state
                 p.rewards.append(player_rewards)
 
+            if self.movable_goals:
+                for g in self.goals:
+
+                    # Initialize rewards for step
+                    goal_rewards = 0
+
+                    # Store rewards gradient value of previous position
+                    prev_goal_gradient_value = self.goal_repulsion_gradient[g.x][g.y]
+
+                    # Call Learning Functions for Agents
+                    g.learn(self.get_current_state(g.x, g.y), self.alpha, self.gamma)
+                    g.act(self.get_current_state(g.x, g.y))
+
+                    # Player Targeted Penalty
+                    for p in self.players:
+                        if g.target_x == p.x and g.target_y == p.y:
+                            goal_rewards = goal_rewards + self.goal_caught_penalty
+                            g.target_x = g.x
+                            g.target_y = g.y
+
+                    # Border Collision Penalty
+                    if g.target_x < 0 or g.target_x >= self.xsize:
+                        g.target_x = g.x
+                        g.target_pos_x = g.pos_x
+                        goal_rewards = goal_rewards + self.border_collide_penalty
+                    if g.target_y < 0 or g.target_y >= self.ysize:
+                        g.target_y = g.y
+                        g.target_pos_y = g.pos_y
+                        goal_rewards = goal_rewards + self.border_collide_penalty
+
+                    for w in self.walls:
+                        if g.target_x == w.x and g.target_y == w.y:
+                            g.target_x = g.x
+                            g.target_y = g.y
+                            g.target_pos_x = g.pos_x
+                            g.target_pos_y = g.pos_y
+                            goal_rewards = goal_rewards + self.wall_collide_penalty
+
+                    # Goal Collision Rewards and Penalties
+                    for gg in self.goals:
+                        if gg != g and g.target_x == gg.x:
+                            goal_rewards = goal_rewards + self.teammate_collide_penalty
+                            g.target_x = g.x
+                            g.target_pos_x = g.pos_x
+                        if gg != g and g.target_y == gg.y:
+                            goal_rewards = goal_rewards + self.teammate_collide_penalty
+                            g.target_y = g.y
+                            g.target_pos_y = g.pos_y
+
+                    # Add a reward based on improvement in position
+                    gradient_reward = self.goal_player_repulsion_factor * (prev_goal_gradient_value - self.goal_repulsion_gradient[g.target_x][g.target_y])
+                    goal_rewards = goal_rewards + gradient_reward
+
+                    # Timestep penalty ("reward")
+                    goal_rewards = goal_rewards - self.timestep_penalty
+
+                    # Update agent reward and previous state
+                    g.rewards.append(goal_rewards)
+
         # Execute movement animation
         for p in self.players:
             if quickact:
@@ -202,10 +274,20 @@ class world():
             else:
                 p.animate_move()
 
+        if self.movable_goals:
+            for g in self.goals:
+                if quickact:
+                    g.quick_move()
+                else:
+                    g.animate_move()
+
     # Check that animations have completed for "Run" mode
     def update_ready(self):
         for p in self.players:
             if p.target_x != p.x or p.target_y != p.y:
+                return False
+        for g in self.goals:
+            if g.target_x != g.x or g.target_y != g.y:
                 return False
                 
         return True
@@ -216,13 +298,16 @@ class world():
         # Get 2d state list
         #     0 -> unoccupied space
         #     -1 -> player position
-        #     999 -> goal position
+        #     -2 -> goal position
+        #     -3 -> wall position
         #     Otherwise, space is team #
         state = np.zeros([self.xsize, self.ysize])
         for p in self.players:
             state[p.x][p.y] = p.team
         for g in self.goals:
-            state[g.x][g.y] = 999
+            state[g.x][g.y] = -2
+        for w in self.walls:
+            state[w.x][w.y] = -3
         state[xx][yy] = -1
         return state
 
@@ -245,29 +330,86 @@ class world():
 
         return ness
 
+    # Create repulsion gradient based on normalized inverse manhattan distance from each player
+    def get_goal_repulsion_gradient(self):
+        ness = np.zeros([self.xsize, self.ysize])
+        onett = 0
+        for i in np.arange(self.xsize):
+            for j in np.arange(self.ysize):
+                for p in self.players:
+                    if (np.abs(i - p.x) + np.abs(j - p.y)) != 0:
+                        ness[i][j] = ness[i][j] + 1 / (np.abs(i - p.x) + np.abs(j - p.y))
+                        onett = onett + 1 / (np.abs(i - p.x) + np.abs(j - p.y))
+                    else:
+                        ness[i][j] = 1
+
+        for i in np.arange(self.xsize):
+            for j in np.arange(self.ysize):
+                ness[i][j] = ness[i][j] / onett
+
+        return ness
+
+    def set_images(self):
+
+        '''TODO FIX THIS'''
+        os.chdir(os.path.dirname(sys.argv[0]))
+        self.player_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/cats.png'), 5, 25, 25)
+        self.goal_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/mouse.png'), 1, 25, 25)
+        self.wall_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/wall.png'), 1, 25, 25)
+
+        for p in self.players:
+            p.img = self.player_imgs[0]
+        for g in self.goals:
+            g.img = self.goal_imgs[0]
+        for w in self.walls:
+            w.img = self.wall_imgs[0]
+
     def set_player_team(self, name, team):
         if team > 5: team = 5 ## TODO - ACTUAL ERROR HANDLING
         for p in self.players:
             if p.name == name:
                 p.team = team
+                p.img = self.player_imgs[team-1]
 
     # Draw world objects
     def draw(self, window):
         for p in self.players:
-            p.draw(window)
+            window.blit(p.img, (p.pos_x, p.pos_y))
         for g in self.goals:
-            g.draw(window)
-    
+            window.blit(g.img, (g.pos_x, g.pos_y))
+        for w in self.walls:
+            window.blit(w.img, (w.pos_x, w.pos_y))
+
+    # Start of a new episode - set everything back to original positions
     def reset(self):
         for p in self.players:
-            p.reset()
+            p.x = p.init_x
+            p.y = p.init_y
+            p.target_x = p.init_x
+            p.target_y = p.init_y
+            p.pos_x = 25 * p.init_x
+            p.pos_y = 25 * p.init_y
+            p.target_pos_x = 25 * p.init_x
+            p.target_pos_y = 25 * p.init_y
+        for g in self.goals:
+            g.x = g.init_x
+            g.y = g.init_y
+            g.target_x = g.init_x
+            g.target_y = g.init_y
+            g.pos_x = 25 * g.init_x
+            g.pos_y = 25 * g.init_y
+            g.target_pos_x = 25 * g.init_x
+            g.target_pos_y = 25 * g.init_y
     
     def add_player(self, name, x, y):
-        self.players.append(player(name, x, y))
+        self.players.append(player.player(name, None, x, y))
 
-    def add_goal(self, x, y):
-        self.goals.append(goal(x, y))
-        
+    def add_goal(self, name, x, y):
+        self.goals.append(player.player(name, None, x, y))
+
+    def add_wall(self, x, y):
+        self.walls.append(wall.wall(None, x, y))
+
     def set_learning_rate(self, val):
         self.alpha = val
     
@@ -282,6 +424,9 @@ class world():
 
     def set_goal_caught_penalty(self, val):
         self.goal_caught_penalty = val
+
+    def set_goal_player_repulsion_factor(self, val):
+        self.goal_player_repulsion_factor = val
 
     def set_team_goal_reward(self, val):
         self.team_goal_reward = val
@@ -309,240 +454,3 @@ class world():
 
     def set_goal_movement_probability(self, val):
         self.goal_movement_probability = val
-
-'''
--------------------------------
-PLAYER CLASS
-To be called by "world" class
--------------------------------
-'''
-
-class player():
-
-    def __init__(self, name, x, y):
-
-        # Initialize player name
-        self.name = name
-
-        # Initial Position - Episode Memory
-        self.init_x = x
-        self.init_y = y
-
-        # Position Attributes
-        self.x = x
-        self.y = y
-        self.target_x = x
-        self.target_y = y
-        self.pos_x = 25*x
-        self.pos_y = 25*y
-        self.target_pos_x = 25*x
-        self.target_pos_y = 25*y
-
-        # Agent Attributes
-        # For each policy:
-        #    0 -> North Probability
-        #    1 -> East Probability
-        #    2 -> South Probability
-        #    3 -> West Probability
-        self.team = 1
-        self.prev_state = 0
-        self.prev_action = 0
-        self.curr_state = -1
-        self.rewards = []
-        self.states, self.policies, self.Q = self.get_player_data()
-
-    def act(self, current_state):
-        
-        # Check for an existing policy for the given state
-        policy = [0.25, 0.25, 0.25, 0.25]
-        if self.curr_state == -1:
-            for idx, s in enumerate(self.states):
-                if s.tolist() == current_state.tolist():
-                    policy = self.policies[idx]
-                    self.prev_state = idx
-        else:
-            policy = self.policies[self.curr_state]
-            self.prev_state = self.curr_state
-
-        pol_sum = 0
-        cumprobs = []
-        for p in policy:
-            pol_sum = pol_sum + p
-            cumprobs.append(pol_sum)
-        
-        # Randomly chose an action based on policy
-        action = policy.index(max(policy))
-        diceroll = np.random.random(1)[0]
-        for idx, c in enumerate(cumprobs):
-            if diceroll <= c:
-                action = idx
-                break
-        
-        # Take the decided action
-        if action == 0:
-            self.set_target(0, -1)
-        elif action == 1:
-            self.set_target(1, 0)
-        elif action == 2:
-            self.set_target(0, 1)
-        elif action == 3:
-            self.set_target(-1, 0)
-
-        # Store previous action
-        self.prev_action = action
-
-    def learn(self, current_state, alpha, gamma):
-
-        # Handle first pass
-        if self.prev_state == [] or len(self.rewards) == 0:
-            return
-
-        # Get policy for the current state and q table for the current state
-        Q_next = []
-        for idx, s in enumerate(self.states):
-            if s.tolist() == current_state.tolist():
-                Q_next = self.Q[idx]
-                self.curr_state = idx
-
-        # Create a new q table and policy for the current state if one doesn't exist
-        if Q_next == []:
-            # Set Default Q Table
-            Q_next = [1, 1, 1, 1]
-
-            # Add new state, policy, and q table
-            self.states.append(np.copy(current_state))
-            self.policies.append([0.25, 0.25, 0.25, 0.25])
-            self.Q.append([1, 1, 1, 1])
-            self.curr_state = len(self.states) - 1
-
-        # Update Q table for prev state:
-        max_Q_next = max(Q_next)
-        rewards_last = self.rewards[len(self.rewards) - 1]
-        self.Q[self.prev_state][self.prev_action] = self.Q[self.prev_state][self.prev_action] + alpha * (rewards_last + gamma * max_Q_next - self.Q[self.prev_state][self.prev_action])
-
-        # Add heuristics to create reasonable nondeterministic policies
-        one_percent_of_range = 0.01*np.abs(max(self.Q[self.prev_state]) - min(self.Q[self.prev_state]))
-        normalized_Q = [0,0,0,0]
-        for a in np.arange(len(self.Q[self.prev_state])):
-            normalized_Q[a] = self.Q[self.prev_state][a] - min(self.Q[self.prev_state]) + one_percent_of_range
-
-        # Create an E-soft-ish policy
-        normalized_sum = sum(normalized_Q)
-        for a in np.arange(len(self.policies[self.prev_state])):
-            self.policies[self.prev_state][a] = normalized_Q[a]/normalized_sum
-
-        # Write to player file to save learned states, policies, and Q functions
-        with open(self.name + ".txt", 'wb') as file:
-            pickle.dump((self.states, self.policies, self.Q), file)
-
-    # Search for stored state/policy file
-    def get_player_data(self):
-        try:
-            # Read stored player information if it exists
-            with open(self.name + ".txt", 'rb') as file: states, policies, Q = pickle.load(file)
-            return states, policies, Q
-        except:
-            # Initialize empty player information if no file found
-            return [], [], []
-
-    # Purely asthetic function for animating the move of each agent
-    def quick_move(self):
-        self.x = self.target_x
-        self.y = self.target_y
-        self.pos_x = self.target_pos_x
-        self.pos_y = self.target_pos_y
-
-        # Purely asthetic function for animating the move of each agent
-    def animate_move(self):
-        if (self.pos_x != self.target_pos_x or self.pos_y != self.target_pos_y):
-            self.pos_x = self.pos_x + np.sign(self.target_pos_x - self.pos_x)
-            self.pos_y = self.pos_y + np.sign(self.target_pos_y - self.pos_y)
-        else:
-            self.x = self.target_x
-            self.y = self.target_y
-    
-    # Set new position based on agent actions
-    def set_target(self, dx, dy):
-        self.target_x = self.x + 1 * dx
-        self.target_y = self.y + 1 * dy
-        self.target_pos_x = self.pos_x + 25 * dx
-        self.target_pos_y = self.pos_y + 25 * dy  
-
-    # Draw the agent on the board
-    def draw(self, window):
-        if self.team == 1:
-            pygame.draw.rect(window, (0,0,255), (self.pos_x, self.pos_y, 25, 25))
-        elif self.team == 2:
-            pygame.draw.rect(window, (255,0,0), (self.pos_x, self.pos_y, 25, 25))
-        elif self.team == 3:
-            pygame.draw.rect(window, (255,0,255), (self.pos_x, self.pos_y, 25, 25))
-        elif self.team == 4:
-            pygame.draw.rect(window, (255,255,0), (self.pos_x, self.pos_y, 25, 25))
-        elif self.team == 5:
-            pygame.draw.rect(window, (0,255,255), (self.pos_x, self.pos_y, 25, 25))
-    
-    # Set agent position to initial value
-    def reset(self):
-        self.x = self.init_x
-        self.y = self.init_y
-        self.target_x = self.init_x
-        self.target_y = self.init_y
-        self.pos_x = 25*self.init_x
-        self.pos_y = 25*self.init_y
-        self.target_pos_x = 25*self.init_x
-        self.target_pos_y = 25*self.init_y
-
-
-'''
--------------------------------
-GOAL CLASS
-To be used by "world" class
--------------------------------
-'''
-
-class goal():
-    
-    # Initialize goal properties
-    def __init__(self, x, y):
-        self.init_x = x
-        self.init_y = y
-
-        self.x = x
-        self.y = y
-        self.target_x = x
-        self.target_y = y
-        self.pos_x = 25*x
-        self.pos_y = 25*y
-        self.target_pos_x = 25*x
-        self.target_pos_y = 25*y
-
-    # Draw the goal
-    def draw(self, window):
-        pygame.draw.rect(window, (50, 255, 50), (self.pos_x, self.pos_y, 25, 25))
-
-    '''TODO - Goal Movement'''
-
-'''
-TODO
-EVERYTHING
-Add Walls to game
-'''
-class wall():
-
-    # Initialize wall properties
-    def __init__(self, x, y):
-        self.init_x = x
-        self.init_y = y
-
-        self.x = x
-        self.y = y
-        self.target_x = x
-        self.target_y = y
-        self.pos_x = 25 * x
-        self.pos_y = 25 * y
-        self.target_pos_x = 25 * x
-        self.target_pos_y = 25 * y
-
-    # Draw the wall
-    def draw(self, window):
-        pygame.draw.rect(window, (100, 100, 100), (self.pos_x, self.pos_y, 25, 25))
