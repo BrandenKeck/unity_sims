@@ -18,17 +18,17 @@ for i in range(10):
             thisWorld.add_wall(i, j)
 
 # Establish settings
-thisWorld.set_timestep_penalty(-10)
-thisWorld.set_border_collide_penalty(-10)
-thisWorld.set_wall_collide_penalty(-10)
+thisWorld.set_timestep_penalty(-25)
+thisWorld.set_border_collide_penalty(-50)
+thisWorld.set_wall_collide_penalty(-50)
 thisWorld.set_goal_gradient_reward_factor(10000)
 thisWorld.set_goal_player_repulsion_factor(10000)
-thisWorld.set_goal_reward(500)
-thisWorld.set_goal_caught_penalty(-500)
+thisWorld.set_goal_reward(5000)
+thisWorld.set_goal_caught_penalty(-5000)
 
 # Simulation Settings
-thisWorld.set_learning_rate(0.45)
-thisWorld.set_discount_factor(0.55)
+thisWorld.set_learning_rate(0.15)
+thisWorld.set_discount_factor(0.1)
 
 # Run Pygame Simulation
 thisWorld.set_movable_goals(True)

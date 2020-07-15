@@ -26,6 +26,10 @@ class world():
         self.gamma = 0.1 ## Discount Factor on Returns
         self.episode_count = 0 ## Number of completed episodes
 
+        # Set timer variables
+        self.timelimit = 10000
+        self.current_time = 0
+
         # Penalties and Rewards
         self.goal_reward = 0
         self.goal_gradient_reward_factor = 0
@@ -38,6 +42,7 @@ class world():
         self.teammate_collide_penalty = 0
         self.opponent_collide_penalty = 0
         self.timestep_penalty = 0
+        self.timelimit_penalty = 0
 
         ''' TODO '''
         # Movable Goals Parameters
@@ -131,7 +136,14 @@ class world():
 
 
     def simulate_action(self, quickact):
+
+        # Check if all moves have completed before taking an action
         if self.update_ready():
+
+            # Count number of actions
+            self.current_time = self.current_time + 1
+
+            # Loop for player actions
             for p in self.players:
             
                 # Initialize rewards for step
@@ -198,6 +210,16 @@ class world():
 
                         return
 
+                # Handle timelimit reached
+                if self.current_time >= self.timelimit:
+                    for pp in self.players: pp.rewards.append(self.timelimit_penalty)
+                    for g in self.goals: g.rewards.append(-self.timelimit_penalty)
+                    self.reset()
+                    self.episode_count = self.episode_count + 1
+                    print("Completed Episodes:  " + str(self.episode_count))
+
+                    return
+
                 # Add a reward based on improvement in position
                 gradient_reward = self.goal_gradient_reward_factor * (self.goal_rewards_gradient[p.target_x][p.target_y] - prev_gradient_value)
                 player_rewards = player_rewards + gradient_reward
@@ -208,6 +230,7 @@ class world():
                 # Update agent reward and previous state
                 p.rewards.append(player_rewards)
 
+            # Loop for Goal actions if goals are movable
             if self.movable_goals:
                 for g in self.goals:
 
@@ -267,13 +290,14 @@ class world():
                     # Update agent reward and previous state
                     g.rewards.append(goal_rewards)
 
-        # Execute movement animation
+        # Execute movement of player
         for p in self.players:
             if quickact:
                 p.quick_move()
             else:
                 p.animate_move()
 
+        # Execute movement of goals
         if self.movable_goals:
             for g in self.goals:
                 if quickact:
@@ -358,7 +382,7 @@ class world():
         self.wall_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/wall.png'), 1, 25, 25)
 
         for p in self.players:
-            p.img = self.player_imgs[0]
+            p.img = self.player_imgs[p.team-1]
         for g in self.goals:
             g.img = self.goal_imgs[0]
         for w in self.walls:
@@ -369,7 +393,6 @@ class world():
         for p in self.players:
             if p.name == name:
                 p.team = team
-                p.img = self.player_imgs[team-1]
 
     # Draw world objects
     def draw(self, window):
@@ -382,6 +405,7 @@ class world():
 
     # Start of a new episode - set everything back to original positions
     def reset(self):
+        self.current_time = 0
         for p in self.players:
             p.x = p.init_x
             p.y = p.init_y
@@ -448,6 +472,9 @@ class world():
 
     def set_timestep_penalty(self, val):
         self.timestep_penalty = val
+
+    def set_timelimit_penalty(self, val):
+        self.timelimit_penalty = val
 
     def set_movable_goals(self, val):
         self.movable_goals = val
