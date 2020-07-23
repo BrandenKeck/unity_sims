@@ -10,6 +10,10 @@ thisWorld = world(10, 8)
 thisWorld.add_player("Player_1", 2, 2)
 thisWorld.add_goal("Goal_1", 7, 5)
 
+# Learn from external policy
+thisWorld.load_policy_data("test.txt")
+
+# Make Walls
 for i in range(10):
     for j in range(8):
         if i%2 == 0 and j%3 == 0:

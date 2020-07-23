@@ -10,11 +10,6 @@ class world():
 
     def __init__(self, xsize, ysize):
 
-        # Image Properties
-        self.player_imgs = None
-        self.goal_imgs = None
-        self.wall_imgs = None
-
         # Dimensions of the board
         self.xsize = xsize
         self.ysize = ysize
@@ -44,7 +39,6 @@ class world():
         self.timestep_penalty = 0
         self.timelimit_penalty = 0
 
-        ''' TODO '''
         # Movable Goals Parameters
         self.movable_goals = False
         self.goal_movement_probability = 0
@@ -55,6 +49,11 @@ class world():
         self.goal_rewards_gradient = []
         self.goal_repulsion_gradient = []
         self.walls = []
+
+        # Image Properties
+        self.player_imgs = None
+        self.goal_imgs = None
+        self.wall_imgs = None
     
     def run_game(self):
         

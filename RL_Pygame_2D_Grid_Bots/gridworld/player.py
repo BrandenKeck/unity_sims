@@ -125,6 +125,10 @@ class player():
         with open(self.name + ".txt", 'wb') as file:
             pickle.dump((self.states, self.policies, self.Q), file)
 
+    # Predict a state based on supplied policies
+    def predict(self):
+        pass
+
     # Search for stored state/policy file
     def get_player_data(self):
         try:
