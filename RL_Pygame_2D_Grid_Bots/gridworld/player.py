@@ -37,6 +37,21 @@ class player():
         self.rewards = []
         self.states, self.policies, self.Q = self.get_player_data()
 
+        # Learning Rate and Discount Parameters
+        self.alpha = 0.1
+        self.gamma = 0.1
+
+        # Learning Settings for the agent
+        self.use_q_learning = True
+        self.use_expected_sarsa = False
+
+        # Policy Settings for the agent
+        self.use_normalized_q_table_soft_policy = True
+        '''TODO - Add More Policy Methods'''
+
+    '''
+    TODO - Clean up this trash
+    '''
     def act(self, current_state):
 
         # Check for an existing policy for the given state
@@ -77,11 +92,32 @@ class player():
         # Store previous action
         self.prev_action = action
 
-    def learn(self, current_state, alpha, gamma):
+    def learn(self, current_state):
 
         # Handle first pass
         if self.prev_state == [] or len(self.rewards) == 0:
             return
+
+        # Call appropriate leaning function
+        if self.use_q_learning:
+            self.q_learning(current_state)
+        elif self.use_expected_sarsa:
+            self.expected_sarsa()
+
+        # Call appropriate policy function
+        if self.use_normalized_q_table_soft_policy:
+            self.normalized_q_table_soft_policy()
+
+        # Write to player file to save learned states, policies, and Q functions
+        with open(self.name + ".txt", 'wb') as file:
+            pickle.dump((self.states, self.policies, self.Q), file)
+
+    '''
+    START LEARNING FUNCTIONS
+    '''
+
+    # Define a function for the Q Learning (value-table) method
+    def q_learning(self, current_state):
 
         # Get policy for the current state and q table for the current state
         Q_next = []
@@ -104,8 +140,20 @@ class player():
         # Update Q table for prev state:
         max_Q_next = max(Q_next)
         rewards_last = self.rewards[len(self.rewards) - 1]
-        self.Q[self.prev_state][self.prev_action] = self.Q[self.prev_state][self.prev_action] + alpha * (
-                    rewards_last + gamma * max_Q_next - self.Q[self.prev_state][self.prev_action])
+        self.Q[self.prev_state][self.prev_action] = self.Q[self.prev_state][self.prev_action] + self.alpha * (
+                rewards_last + self.gamma * max_Q_next - self.Q[self.prev_state][self.prev_action])
+
+    '''TODO'''
+    # Define a function for the Expected SARSA (value-table) method
+    def expected_sarsa(self):
+        pass
+
+    '''
+    START POLICY FUNCTIONS
+    '''
+
+    # Heuristic policy for exploration when using a value-table learning method
+    def normalized_q_table_soft_policy(self):
 
         # Add heuristics to create reasonable nondeterministic policies
         one_percent_of_range = 0.01 * np.abs(max(self.Q[self.prev_state]) - min(self.Q[self.prev_state]))
@@ -121,13 +169,9 @@ class player():
             for a in np.arange(len(self.policies[self.prev_state])):
                 self.policies[self.prev_state][a] = normalized_Q[a] / normalized_sum
 
-        # Write to player file to save learned states, policies, and Q functions
-        with open(self.name + ".txt", 'wb') as file:
-            pickle.dump((self.states, self.policies, self.Q), file)
-
-    # Predict a state based on supplied policies
-    def predict(self):
-        pass
+    '''
+    START MISC FUNCTIONS
+    '''
 
     # Search for stored state/policy file
     def get_player_data(self):

@@ -15,13 +15,9 @@ class world():
         self.ysize = ysize
         self.w = 25*xsize
         self.h = 25*ysize
-        
-        # Reinforcement Learning Parameters
-        self.alpha = 0.1 ## Learning rate / step size
-        self.gamma = 0.1 ## Discount Factor on Returns
-        self.episode_count = 0 ## Number of completed episodes
 
-        # Set timer variables
+        # Set episodic variables
+        self.episode_count = 0
         self.timelimit = 10000
         self.current_time = 0
 
@@ -133,7 +129,12 @@ class world():
             # Simulate
             self.simulate_action(True)
 
-
+    '''
+    TODO TODO TODO TODO TODO
+    Simplify this nonsense
+     - functionalize penalties
+     - better "get current state" interaction between classes
+    '''
     def simulate_action(self, quickact):
 
         # Check if all moves have completed before taking an action
@@ -152,7 +153,7 @@ class world():
                 prev_gradient_value = self.goal_rewards_gradient[p.x][p.y]
 
                 # Call Learning Functions for Agents
-                p.learn(self.get_current_state(p.x, p.y), self.alpha, self.gamma)
+                p.learn(self.get_current_state(p.x, p.y))
                 p.act(self.get_current_state(p.x, p.y))
 
                 # Border Collision Penalty
@@ -240,7 +241,7 @@ class world():
                     prev_goal_gradient_value = self.goal_repulsion_gradient[g.x][g.y]
 
                     # Call Learning Functions for Agents
-                    g.learn(self.get_current_state(g.x, g.y), self.alpha, self.gamma)
+                    g.learn(self.get_current_state(g.x, g.y))
                     g.act(self.get_current_state(g.x, g.y))
 
                     # Player Targeted Penalty
@@ -334,6 +335,9 @@ class world():
         state[xx][yy] = -1
         return state
 
+    '''
+    TODO TODO TODO - Consolidate  and Optimize Gradient Functions
+    '''
     # Create rewards gradient based on normalized inverse manhattan distance from each goal
     def get_goal_rewards_gradient(self):
         ness = np.zeros([self.xsize, self.ysize])
@@ -372,36 +376,6 @@ class world():
 
         return ness
 
-    def set_images(self):
-
-        '''TODO FIX THIS'''
-        os.chdir(os.path.dirname(sys.argv[0]))
-        self.player_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/cats.png'), 5, 25, 25)
-        self.goal_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/mouse.png'), 1, 25, 25)
-        self.wall_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/wall.png'), 1, 25, 25)
-
-        for p in self.players:
-            p.img = self.player_imgs[p.team-1]
-        for g in self.goals:
-            g.img = self.goal_imgs[0]
-        for w in self.walls:
-            w.img = self.wall_imgs[0]
-
-    def set_player_team(self, name, team):
-        if team > 5: team = 5 ## TODO - ACTUAL ERROR HANDLING
-        for p in self.players:
-            if p.name == name:
-                p.team = team
-
-    # Draw world objects
-    def draw(self, window):
-        for p in self.players:
-            window.blit(p.img, (p.pos_x, p.pos_y))
-        for g in self.goals:
-            window.blit(g.img, (g.pos_x, g.pos_y))
-        for w in self.walls:
-            window.blit(w.img, (w.pos_x, w.pos_y))
-
     # Start of a new episode - set everything back to original positions
     def reset(self):
         self.current_time = 0
@@ -423,7 +397,39 @@ class world():
             g.pos_y = 25 * g.init_y
             g.target_pos_x = 25 * g.init_x
             g.target_pos_y = 25 * g.init_y
-    
+
+    '''
+    BEGIN RENDERING FUNCTIONS
+    '''
+
+    # Draw world objects
+    def draw(self, window):
+        for p in self.players:
+            window.blit(p.img, (p.pos_x, p.pos_y))
+        for g in self.goals:
+            window.blit(g.img, (g.pos_x, g.pos_y))
+        for w in self.walls:
+            window.blit(w.img, (w.pos_x, w.pos_y))
+
+    # Import image data and set to variables (Cat / Mouse / Wall characters)
+    def set_images(self):
+
+        os.chdir(os.path.dirname(sys.argv[0]))
+        self.player_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/cats.png'), 5, 25, 25)
+        self.goal_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/mouse.png'), 1, 25, 25)
+        self.wall_imgs = spritesheet.make_sprite_array(spritesheet.spritesheet('../../../_img/wall.png'), 1, 25, 25)
+
+        for p in self.players:
+            p.img = self.player_imgs[p.team - 1]
+        for g in self.goals:
+            g.img = self.goal_imgs[0]
+        for w in self.walls:
+            w.img = self.wall_imgs[0]
+
+    '''
+    BEGIN SET/GET FUNCTIONS
+    '''
+
     def add_player(self, name, x, y):
         self.players.append(player.player(name, None, x, y))
 
@@ -433,11 +439,40 @@ class world():
     def add_wall(self, x, y):
         self.walls.append(wall.wall(None, x, y))
 
-    def set_learning_rate(self, val):
-        self.alpha = val
+    # Change team of player by player name (Team Default is 1; Options are 1 through 5)
+    def set_player_team(self, name, team):
+        if team > 5: team = 5  ## TODO - ACTUAL ERROR HANDLING
+        for p in self.players:
+            if p.name == name:
+                p.team = team
+
+    def set_global_learning_rate(self, val):
+        for p in self.players:
+            p.alpha = val
+        for g in self.goals:
+            g.alpha = val
     
-    def set_discount_factor(self, val):
-        self.gamma = val
+    def set_global_discount_factor(self, val):
+        for p in self.players:
+            p.gamma = val
+        for g in self.goals:
+            g.gamma = val
+
+    def set_agent_learning_rate(self, name, val):
+        for p in self.players:
+            if p.name == name:
+                p.alpha = val
+        for g in self.goals:
+            if g.name == name:
+                g.alpha = val
+
+    def set_agent_discount_factor(self, name, val):
+        for p in self.players:
+            if p.name == name:
+                p.gamma = val
+        for g in self.goals:
+            if g.name == name:
+                g.gamma = val
     
     def set_goal_reward(self, val):
         self.goal_reward = val
