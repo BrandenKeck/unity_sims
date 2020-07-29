@@ -42,8 +42,8 @@ class player():
         self.qtable, self.ann = self.get_player_data()
 
         # Learning Settings for the agent
-        self.use_q_learning = True
-        self.use_ann_approx = False
+        self.use_q_learning = False
+        self.use_ann_approx = True
 
         # Policy Settings for the agent
         self.use_normalized_q_table_soft_policy = True
@@ -73,10 +73,10 @@ class player():
 
         # Artificial Neural Network Value Function Approximation uses the ANN Custom Class Object
         if self.use_ann_approx:
-            pass
-            '''
-            TODO - COMING NEXT
-            '''
+
+            # Handle First Pass
+            if self.qtable == None:
+                self.qtable = qtable()
 
         # Write to player file to save learned states, policies, and Q functions
         self.set_player_data()

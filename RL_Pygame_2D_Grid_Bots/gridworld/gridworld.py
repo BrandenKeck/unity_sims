@@ -2,7 +2,7 @@
 import pygame, sys, os
 import numpy as np
 
-# Class Imports
+# Custom Class Imports
 import player, wall, spritesheet
 
 # World Class - Runs Simulations
@@ -292,27 +292,21 @@ class world():
 
         # Execute movement of player
         for p in self.players:
-            if quickact:
-                p.quick_move()
-            else:
-                p.animate_move()
+            if quickact: p.quick_move()
+            else: p.animate_move()
 
         # Execute movement of goals
         if self.movable_goals:
             for g in self.goals:
-                if quickact:
-                    g.quick_move()
-                else:
-                    g.animate_move()
+                if quickact: g.quick_move()
+                else: g.animate_move()
 
     # Check that animations have completed for "Run" mode
     def update_ready(self):
         for p in self.players:
-            if p.target_x != p.x or p.target_y != p.y:
-                return False
+            if p.target_x != p.x or p.target_y != p.y: return False
         for g in self.goals:
-            if g.target_x != g.x or g.target_y != g.y:
-                return False
+            if g.target_x != g.x or g.target_y != g.y: return False
                 
         return True
 
