@@ -10,9 +10,6 @@ thisWorld = world(10, 8)
 thisWorld.add_player("Player_1", 2, 2)
 thisWorld.add_goal("Goal_1", 7, 5)
 
-# Learn from external policy
-thisWorld.load_policy_data("test.txt")
-
 # Make Walls
 for i in range(10):
     for j in range(8):
@@ -31,8 +28,8 @@ thisWorld.set_goal_reward(5000)
 thisWorld.set_goal_caught_penalty(-5000)
 
 # Simulation Settings
-thisWorld.set_learning_rate(0.15)
-thisWorld.set_discount_factor(0.1)
+thisWorld.set_global_learning_rate(0.15)
+thisWorld.set_global_discount_factor(0.1)
 
 # Run Pygame Simulation
 thisWorld.set_movable_goals(True)

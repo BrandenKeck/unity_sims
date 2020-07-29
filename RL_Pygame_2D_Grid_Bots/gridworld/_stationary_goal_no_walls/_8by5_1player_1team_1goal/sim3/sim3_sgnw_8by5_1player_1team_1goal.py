@@ -15,5 +15,10 @@ thisWorld.set_timestep_penalty(-1)
 thisWorld.set_goal_reward(20)
 thisWorld.set_goal_gradient_reward_factor(1000)
 
+# Learning Params
+thisWorld.set_global_learning_rate(0.01)
+thisWorld.set_global_discount_factor(0.1)
+
 # Run Pygame Simulation
+thisWorld.train_agents(1000)
 thisWorld.run_game()

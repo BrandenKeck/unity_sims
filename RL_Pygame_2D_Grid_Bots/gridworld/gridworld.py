@@ -154,7 +154,7 @@ class world():
 
                 # Call Learning Functions for Agents
                 p.learn(self.get_current_state(p.x, p.y))
-                p.act(self.get_current_state(p.x, p.y))
+                p.act()
 
                 # Border Collision Penalty
                 if p.target_x < 0 or p.target_x >= self.xsize:
@@ -195,14 +195,14 @@ class world():
                 for g in self.goals:
                     if p.x == g.x and p.y == g.y:
                         player_rewards = player_rewards + self.goal_reward
-                        p.rewards.append(player_rewards)
+                        p.last_reward = player_rewards
                         for pp in self.players:
                             if pp != p and p.team == pp.team:
-                                pp.rewards.append(self.team_goal_reward)
+                                pp.last_reward = self.team_goal_reward
                             elif pp != p and p.team != pp.team: 
-                                pp.rewards.append(self.opponent_goal_penalty)
+                                pp.last_reward = self.opponent_goal_penalty
 
-                        g.rewards.append(self.goal_caught_penalty)
+                        g.last_reward = self.goal_caught_penalty
 
                         self.reset()
                         self.episode_count = self.episode_count + 1
@@ -212,8 +212,8 @@ class world():
 
                 # Handle timelimit reached
                 if self.current_time >= self.timelimit:
-                    for pp in self.players: pp.rewards.append(self.timelimit_penalty)
-                    for g in self.goals: g.rewards.append(-self.timelimit_penalty)
+                    for pp in self.players: pp.last_reward = self.timelimit_penalty
+                    for g in self.goals: g.last_reward = -self.timelimit_penalty
                     self.reset()
                     self.episode_count = self.episode_count + 1
                     print("Completed Episodes:  " + str(self.episode_count))
@@ -228,7 +228,7 @@ class world():
                 player_rewards = player_rewards + self.timestep_penalty
                 
                 # Update agent reward and previous state
-                p.rewards.append(player_rewards)
+                p.last_reward = player_rewards
 
             # Loop for Goal actions if goals are movable
             if self.movable_goals:
@@ -242,7 +242,7 @@ class world():
 
                     # Call Learning Functions for Agents
                     g.learn(self.get_current_state(g.x, g.y))
-                    g.act(self.get_current_state(g.x, g.y))
+                    g.act()
 
                     # Player Targeted Penalty
                     for p in self.players:
@@ -288,7 +288,7 @@ class world():
                     goal_rewards = goal_rewards - self.timestep_penalty
 
                     # Update agent reward and previous state
-                    g.rewards.append(goal_rewards)
+                    g.last_reward = goal_rewards
 
         # Execute movement of player
         for p in self.players:
@@ -333,10 +333,13 @@ class world():
         for w in self.walls:
             state[w.x][w.y] = -3
         state[xx][yy] = -1
+        #print(state)
+        #input()
         return state
 
     '''
     TODO TODO TODO - Consolidate  and Optimize Gradient Functions
+    ACTUALLY ,, bump gradient functions to player class eventually
     '''
     # Create rewards gradient based on normalized inverse manhattan distance from each goal
     def get_goal_rewards_gradient(self):

@@ -1,19 +1,27 @@
+# Get libraries
 import pickle
 import numpy as np
 
+# Get custom classes
+import policy_manager
+from qtable import qtable
+from ann import ann
+
+# Define a class to be used universally by all players, including movable goals
 class player():
 
     def __init__(self, name, img, x, y):
 
-        # Initialize player name
+        # Initialize player attributes
         self.name = name
         self.img = img
+        self.team = 1
 
-        # Initial Position - Episode Memory
+        # Initialize position for episode memory
         self.init_x = x
         self.init_y = y
 
-        # Position Attributes
+        # Position attributes
         self.x = x
         self.y = y
         self.target_x = x
@@ -23,56 +31,68 @@ class player():
         self.target_pos_x = 25 * x
         self.target_pos_y = 25 * y
 
-        # Agent Attributes
-        # For each policy:
-        #    0 -> Do Nothing
-        #    1 -> North Probability
-        #    2 -> East Probability
-        #    3 -> South Probability
-        #    4 -> West Probability
-        self.team = 1
-        self.prev_state = 0
-        self.prev_action = 0
-        self.curr_state = -1
-        self.rewards = []
-        self.states, self.policies, self.Q = self.get_player_data()
-
-        # Learning Rate and Discount Parameters
+        # Learning params and attributes
         self.alpha = 0.1
         self.gamma = 0.1
+        self.last_reward = 0
+        self.last_action = 0
+        self.current_policy = None
+
+        # Attempt to get stored learning structures
+        self.qtable, self.ann = self.get_player_data()
 
         # Learning Settings for the agent
         self.use_q_learning = True
-        self.use_expected_sarsa = False
+        self.use_ann_approx = False
 
         # Policy Settings for the agent
         self.use_normalized_q_table_soft_policy = True
-        '''TODO - Add More Policy Methods'''
 
     '''
-    TODO - Clean up this trash
+    BEGIN PRIMARY FUNCTIONS
     '''
-    def act(self, current_state):
 
-        # Check for an existing policy for the given state
-        policy = [0.2, 0.2, 0.2, 0.2, 0.2]
-        if self.curr_state == -1:
-            for idx, s in enumerate(self.states):
-                if s.tolist() == current_state.tolist():
-                    policy = self.policies[idx]
-                    self.prev_state = idx
-        else:
-            policy = self.policies[self.curr_state]
-            self.prev_state = self.curr_state
+    # Utilize learning classes based on user settings
+    # Update current policy as a result
+    def learn(self, current_state):
 
+
+        # Q-Learning Method uses the QTable Custom Class Object
+        if self.use_q_learning:
+
+            # Handle First Pass
+            if self.qtable == None:
+                self.qtable = qtable()
+
+            # Learn the QTable
+            self.qtable.q_learning(current_state, self.alpha, self.gamma, self.last_reward, self.last_action)
+
+            # Update Policy based on user settings
+            if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(self.qtable.action_values[self.qtable.curr_state_idx], 0.01)
+
+
+        # Artificial Neural Network Value Function Approximation uses the ANN Custom Class Object
+        if self.use_ann_approx:
+            pass
+            '''
+            TODO - COMING NEXT
+            '''
+
+        # Write to player file to save learned states, policies, and Q functions
+        self.set_player_data()
+
+
+    # Take Action Based on Current Policy
+    def act(self):
+
+        # Create a cumulative policy distribution
         pol_sum = 0
         cumprobs = []
-        for p in policy:
+        for p in self.current_policy:
             pol_sum = pol_sum + p
             cumprobs.append(pol_sum)
 
         # Randomly chose an action based on policy
-        action = policy.index(max(policy))
         diceroll = np.random.random(1)[0]
         for idx, c in enumerate(cumprobs):
             if diceroll <= c:
@@ -80,97 +100,17 @@ class player():
                 break
 
         # Take the decided action
-        if action == 1:
-            self.set_target(0, -1)
-        elif action == 2:
-            self.set_target(1, 0)
-        elif action == 3:
-            self.set_target(0, 1)
-        elif action == 4:
-            self.set_target(-1, 0)
+        # action 0 does nothing
+        if action == 1: self.set_target(0, -1)
+        elif action == 2: self.set_target(1, 0)
+        elif action == 3: self.set_target(0, 1)
+        elif action == 4: self.set_target(-1, 0)
 
         # Store previous action
-        self.prev_action = action
-
-    def learn(self, current_state):
-
-        # Handle first pass
-        if self.prev_state == [] or len(self.rewards) == 0:
-            return
-
-        # Call appropriate leaning function
-        if self.use_q_learning:
-            self.q_learning(current_state)
-        elif self.use_expected_sarsa:
-            self.expected_sarsa()
-
-        # Call appropriate policy function
-        if self.use_normalized_q_table_soft_policy:
-            self.normalized_q_table_soft_policy()
-
-        # Write to player file to save learned states, policies, and Q functions
-        with open(self.name + ".txt", 'wb') as file:
-            pickle.dump((self.states, self.policies, self.Q), file)
+        self.last_action = action
 
     '''
-    START LEARNING FUNCTIONS
-    '''
-
-    # Define a function for the Q Learning (value-table) method
-    def q_learning(self, current_state):
-
-        # Get policy for the current state and q table for the current state
-        Q_next = []
-        for idx, s in enumerate(self.states):
-            if s.tolist() == current_state.tolist():
-                Q_next = self.Q[idx]
-                self.curr_state = idx
-
-        # Create a new q table and policy for the current state if one doesn't exist
-        if Q_next == []:
-            # Set Default Q Table
-            Q_next = [0, 0, 0, 0, 0]
-
-            # Add new state, policy, and q table
-            self.states.append(np.copy(current_state))
-            self.policies.append([0.2, 0.2, 0.2, 0.2, 0.2])
-            self.Q.append([0, 0, 0, 0, 0])
-            self.curr_state = len(self.states) - 1
-
-        # Update Q table for prev state:
-        max_Q_next = max(Q_next)
-        rewards_last = self.rewards[len(self.rewards) - 1]
-        self.Q[self.prev_state][self.prev_action] = self.Q[self.prev_state][self.prev_action] + self.alpha * (
-                rewards_last + self.gamma * max_Q_next - self.Q[self.prev_state][self.prev_action])
-
-    '''TODO'''
-    # Define a function for the Expected SARSA (value-table) method
-    def expected_sarsa(self):
-        pass
-
-    '''
-    START POLICY FUNCTIONS
-    '''
-
-    # Heuristic policy for exploration when using a value-table learning method
-    def normalized_q_table_soft_policy(self):
-
-        # Add heuristics to create reasonable nondeterministic policies
-        one_percent_of_range = 0.01 * np.abs(max(self.Q[self.prev_state]) - min(self.Q[self.prev_state]))
-        normalized_Q = [0, 0, 0, 0, 0]
-        for a in np.arange(len(self.Q[self.prev_state])):
-            normalized_Q[a] = self.Q[self.prev_state][a] - min(self.Q[self.prev_state]) + one_percent_of_range
-
-        # Create an E-soft-ish policy
-        normalized_sum = sum(normalized_Q)
-        if normalized_sum == 0:
-            self.policies[self.prev_state] = [0.2, 0.2, 0.2, 0.2, 0.2]
-        else:
-            for a in np.arange(len(self.policies[self.prev_state])):
-                self.policies[self.prev_state][a] = normalized_Q[a] / normalized_sum
-
-    '''
-    START MISC FUNCTIONS
+    BEGIN MISC FUNCTIONS
     '''
 
     # Search for stored state/policy file
@@ -178,21 +118,26 @@ class player():
         try:
             # Read stored player information if it exists
             with open(self.name + ".txt", 'rb') as file:
-                states, policies, Q = pickle.load(file)
-            return states, policies, Q
+                qtable, ann = pickle.load(file)
+            return qtable, ann
         except:
             # Initialize empty player information if no file found
-            return [], [], []
+            return None, None
 
-    # Purely asthetic function for animating the move of each agent
+    # Store player data for use in subsequent simulations
+    def set_player_data(self):
+        # Write Player Data to Stored File
+        with open(self.name + ".txt", 'wb') as file:
+            pickle.dump((self.qtable, self.ann), file)
+
+    # Quick move function for use in non-visualized training
     def quick_move(self):
         self.x = self.target_x
         self.y = self.target_y
         self.pos_x = self.target_pos_x
         self.pos_y = self.target_pos_y
 
-        # Purely asthetic function for animating the move of each agent
-
+    # Purely asthetic function for animating the move of each agent
     def animate_move(self):
         if (self.pos_x != self.target_pos_x or self.pos_y != self.target_pos_y):
             self.pos_x = self.pos_x + np.sign(self.target_pos_x - self.pos_x)
