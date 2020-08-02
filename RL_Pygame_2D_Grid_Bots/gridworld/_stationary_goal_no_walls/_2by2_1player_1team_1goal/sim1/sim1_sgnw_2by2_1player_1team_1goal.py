@@ -6,7 +6,7 @@ sys.path.append("../../..")
 from gridworld import world
 
 # Create game instance
-thisWorld = world(2, 2)
+thisWorld = world(4, 4)
 thisWorld.add_player("Player_1", 0, 0)
 thisWorld.add_goal("Goal_1", 1, 1)
 

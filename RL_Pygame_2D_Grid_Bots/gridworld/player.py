@@ -5,7 +5,7 @@ import numpy as np
 # Get custom classes
 import policy_manager
 from qtable import qtable
-from ann import ann
+from neural_network import neural_network
 
 # Define a class to be used universally by all players, including movable goals
 class player():
@@ -39,11 +39,11 @@ class player():
         self.current_policy = None
 
         # Attempt to get stored learning structures
-        self.qtable, self.ann = self.get_player_data()
+        self.qtable, self.neural_network = self.get_player_data()
 
         # Learning Settings for the agent
         self.use_q_learning = False
-        self.use_ann_approx = True
+        self.use_nn_approx = True
 
         # Policy Settings for the agent
         self.use_normalized_q_table_soft_policy = True
@@ -62,21 +62,23 @@ class player():
 
             # Handle First Pass
             if self.qtable == None:
-                self.qtable = qtable()
+                self.qtable = qtable(5)
 
             # Learn the QTable
             self.qtable.q_learning(current_state, self.alpha, self.gamma, self.last_reward, self.last_action)
 
             # Update Policy based on user settings
-            if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(self.qtable.action_values[self.qtable.curr_state_idx], 0.01)
+            if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(self.qtable.action_values[self.qtable.curr_state_idx])
 
 
         # Artificial Neural Network Value Function Approximation uses the ANN Custom Class Object
-        if self.use_ann_approx:
+        if self.use_nn_approx:
 
             # Handle First Pass
-            if self.qtable == None:
-                self.qtable = qtable()
+            if self.neural_network == None:
+                inputsize = len(np.array(current_state).flatten().tolist())
+                self.neural_network = neural_network([inputsize, np.round(inputsize/2), 5])
+                input()
 
         # Write to player file to save learned states, policies, and Q functions
         self.set_player_data()
@@ -118,8 +120,8 @@ class player():
         try:
             # Read stored player information if it exists
             with open(self.name + ".txt", 'rb') as file:
-                qtable, ann = pickle.load(file)
-            return qtable, ann
+                qtable, neural_network = pickle.load(file)
+            return qtable, neural_network
         except:
             # Initialize empty player information if no file found
             return None, None
@@ -128,7 +130,7 @@ class player():
     def set_player_data(self):
         # Write Player Data to Stored File
         with open(self.name + ".txt", 'wb') as file:
-            pickle.dump((self.qtable, self.ann), file)
+            pickle.dump((self.qtable, self.neural_network), file)
 
     # Quick move function for use in non-visualized training
     def quick_move(self):
