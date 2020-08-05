@@ -14,21 +14,16 @@ X_train, X_test, Y_train, Y_test = train_test_split(XT, newYT, test_size=0.2)
 X = np.array(X_train).T
 Y = np.array(Y_train).T
 
-myNet = neural_network([4, 50, 20, 5, 3])
-myNet.training_batch_size = 100
-myNet.train_network(X, Y, 10000)
+myNet = neural_network([4, 16, 4, 3])
+myNet.training_batch_size = 20
+myNet.train_network(X, Y, 100000)
 
 X = np.array(X_test).T
 Y = np.array(Y_test).T
 
-Y_hat = myNet.classify_data(X)
-
-print("Differences: ")
-print(Y)
-print(Y_hat)
-print(Y - Y_hat)
-
-print("Average Squared Error: ")
-print(np.sum((Y - Y_hat)**2)/Y.shape[1])
-
-
+while True:
+    i = np.random.randint(0, X.shape[1], 1)
+    Y_hat = myNet.classify_data(X[:,i])
+    print(Y_hat)
+    print(Y[:,i])
+    input()

@@ -21,20 +21,23 @@ class neural_network():
             self.w.append(0.01 * np.random.randn(self.layersizes[i], self.layersizes[i-1]))
             self.b.append(np.zeros(self.layersizes[i]))
 
-        # Initialize Network Parameters
-        self.learning_rates = 0.1 * np.ones(len(self.w))
+        # Misc. Network Settings
+        self.learning_rates = 0.01 * np.ones(len(self.w))
         self.leaky_relu_rates = 0.01 * np.ones(len(self.w))
+        self.huber_cost_delta = 5
+
+        # Initialize Cost Function Settings
+        # DEFAULT: Huber Cost Function
+        self.use_huber_cost = True
+        self.use_hellinger_cost = False
+        self.use_quadratic_cost = False
 
         # Initialize Activation Function Settings
-        self.use_leaky_relu = [False] * len(self.w)
-        self.use_relu = [True] * len(self.w)
+        # DEFAULT: ReLU for hidden layers and Sigmoid output layer
+        self.use_leaky_relu = [True] * (len(self.w) - 1) + [False]
+        self.use_sigmoid = [False] * (len(self.w) - 1) + [True]
+        self.use_relu = [False] * len(self.w)
         self.use_tanh = [False] * len(self.w)
-        self.use_softmax = [False] * len(self.w)
-        self.use_sigmoid = [False] * len(self.w)
-
-        # reset Final Layer to Sigmoid
-        self.use_relu[len(self.w) - 1] = False
-        self.use_sigmoid[len(self.w) - 1] = True
 
     # Function to perform NN training steps (iterative prediction / backpropagation)
     def train_network(self, data, labels, iter):
@@ -75,7 +78,6 @@ class neural_network():
             if self.use_leaky_relu[i]: a = leaky_ReLU(z, self.leaky_relu_rates[i])
             elif self.use_relu[i]: a = ReLU(z)
             elif self.use_tanh[i]: a = tanh(z)
-            elif self.use_softmax[i]: a = softmax(z)
             elif self.use_sigmoid[i]: a = sigmoid(z)
             else: a = ReLU(z)
             self.a.append(a)
@@ -92,20 +94,25 @@ class neural_network():
         # Loop over layers backwards
         for i in np.flip(np.arange(len(self.w))):
 
+            # Calculate Loss Function Derivatiove dL/dA
+            if self.use_huber_cost: dL = d_huber(Y, self.y_hat, self.huber_cost_delta)
+            elif self.use_hellinger_cost: dL = d_hellinger(Y, self.y_hat)
+            elif self.use_quadratic_cost: dL = d_quadratic(Y, self.y_hat)
+            else: dL = d_hellinger(Y, self.y_hat)
+
             # Calculate Activation Function Derivative dA/dZ
-            if self.use_leaky_relu[i]: dg = d_leaky_ReLU(self.z[i], self.leaky_relu_rates[i])
-            elif self.use_relu[i]: dg = d_ReLU(self.z[i])
-            elif self.use_tanh[i]: dg = d_tanh(self.z[i])
-            elif self.use_softmax[i]: dg = d_softmax(self.z[i])
-            elif self.use_sigmoid[i]: dg = d_sigmoid(self.z[i])
-            else: dg = d_sigmoid(self.z[i])
+            if self.use_leaky_relu[i]: dA = d_leaky_ReLU(self.z[i], self.leaky_relu_rates[i])
+            elif self.use_relu[i]: dA = d_ReLU(self.z[i])
+            elif self.use_tanh[i]: dA = d_tanh(self.z[i])
+            elif self.use_sigmoid[i]: dA = d_sigmoid(self.z[i])
+            else: dA = d_sigmoid(self.z[i])
 
             # Calculated pre-activated node derivative
             if i == (len(self.w) - 1):
-                dz = -2 * (Y - self.y_hat) * dg
+                dz = dL * dA
                 prev_dz = dz
             else:
-                dz = np.matmul(self.w[i + 1].T, prev_dz) * dg
+                dz = np.matmul(self.w[i + 1].T, prev_dz) * dA
                 prev_dz = dz
 
             # Calculate Weight Derivatives
@@ -115,6 +122,20 @@ class neural_network():
             # Apply Learning Functions
             self.w[i] = self.w[i] - self.learning_rates[i] * dw
             self.b[i] = self.b[i] - self.learning_rates[i] * db
+
+'''
+COST FUNCTION DERIVATIVES
+'''
+
+def d_huber(Y, Y_hat, delta):
+    if np.linalg.norm(Y_hat - Y) < delta: return Y_hat - Y
+    else: return delta * np.sign(Y_hat - Y)
+
+def d_hellinger(Y, Y_hat):
+    return (1/np.sqrt(2))*(np.ones(Y.shape) - np.divide(np.sqrt(Y), np.sqrt(Y_hat)))
+
+def d_quadratic(Y, Y_hat):
+    return Y_hat - Y
 
 ''' 
 ACTIVATION FUCNTIONS 
@@ -127,9 +148,6 @@ def ReLU(x):
 
 def tanh(x):
     return (np.exp(x) - np.exp(-1*x))/(np.exp(x) + np.exp(-1*x))
-
-def softmax(x):
-    return np.exp(x)/np.sum(np.exp(x))
 
 def sigmoid(x):
     return 1/(1+np.exp(-1*x))
@@ -146,9 +164,6 @@ def d_ReLU(x):
 
 def d_tanh(x):
     return 1 - (tanh(x))**2
-
-def d_softmax(x):
-    return softmax(x)*(1 - softmax(x))
 
 def d_sigmoid(x):
     return sigmoid(x)*(1 - sigmoid(x))
