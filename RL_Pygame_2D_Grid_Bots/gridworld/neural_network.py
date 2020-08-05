@@ -13,6 +13,7 @@ class neural_network():
         self.a = []
         self.z = []
         self.y_hat = None
+        self.y_prob = None
 
         # Initialize Weight Arrays
         self.w = []
@@ -84,6 +85,7 @@ class neural_network():
 
         # Store prediction
         self.y_hat = self.a[len(self.a) - 1]
+        self.y_prob = self.y_hat / np.sum(self.y_hat, axis=0)
 
     # Function to perform backpropagation on network weights after a prediction has been stored in self.y_hat
     def learn(self, Y):
