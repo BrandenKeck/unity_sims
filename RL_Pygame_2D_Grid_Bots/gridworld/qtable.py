@@ -18,7 +18,7 @@ class qtable():
         self.curr_state_idx = -1
 
     # Define a function for the Q Learning (value-table) method
-    def q_learning(self, current_state, alpha, gamma, last_reward, last_action):
+    def q_learning(self, current_state, last_reward, last_action, alpha, gamma):
 
         # Attempt to find q table for the current state
         next_values = []

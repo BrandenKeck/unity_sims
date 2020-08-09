@@ -1,3 +1,7 @@
+# Change system directory
+import sys
+sys.path.append("..")
+
 import numpy as np
 from neural_network import neural_network
 

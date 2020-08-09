@@ -7,7 +7,6 @@ class neural_network():
 
         # Track layersizes as a numpy array
         self.layersizes = np.array([int(i) for i in layer_sizes])
-        self.training_batch_size = 1
 
         # Initialize Node Arrays
         self.a = []
@@ -23,6 +22,7 @@ class neural_network():
             self.b.append(np.zeros(self.layersizes[i]))
 
         # Misc. Network Settings
+        self.training_batch_size = 1
         self.learning_rates = 0.01 * np.ones(len(self.w))
         self.leaky_relu_rates = 0.01 * np.ones(len(self.w))
         self.huber_cost_delta = 5
@@ -38,6 +38,7 @@ class neural_network():
         self.use_leaky_relu = [True] * (len(self.w) - 1) + [False]
         self.use_sigmoid = [False] * (len(self.w) - 1) + [True]
         self.use_relu = [False] * len(self.w)
+        self.use_linear = [False] * len(self.w)
         self.use_tanh = [False] * len(self.w)
 
     # Function to perform NN training steps (iterative prediction / backpropagation)
@@ -78,6 +79,7 @@ class neural_network():
             # Calculate A (activated node values for layer)
             if self.use_leaky_relu[i]: a = leaky_ReLU(z, self.leaky_relu_rates[i])
             elif self.use_relu[i]: a = ReLU(z)
+            elif self.use_linear[i]: a = linear(z)
             elif self.use_tanh[i]: a = tanh(z)
             elif self.use_sigmoid[i]: a = sigmoid(z)
             else: a = ReLU(z)
@@ -89,6 +91,10 @@ class neural_network():
 
     # Function to perform backpropagation on network weights after a prediction has been stored in self.y_hat
     def learn(self, Y):
+
+        # Reshape vector into 2D array if necessary
+        if Y.ndim == 1:
+            Y.shape = (1, -1)
 
         # Store number of datapoints
         m = Y.shape[1]
@@ -105,6 +111,7 @@ class neural_network():
             # Calculate Activation Function Derivative dA/dZ
             if self.use_leaky_relu[i]: dA = d_leaky_ReLU(self.z[i], self.leaky_relu_rates[i])
             elif self.use_relu[i]: dA = d_ReLU(self.z[i])
+            elif self.use_relu[i]: dA = d_linear(self.z[i])
             elif self.use_tanh[i]: dA = d_tanh(self.z[i])
             elif self.use_sigmoid[i]: dA = d_sigmoid(self.z[i])
             else: dA = d_sigmoid(self.z[i])
@@ -148,6 +155,9 @@ def leaky_ReLU(x, e):
 def ReLU(x):
     return np.maximum(0, x)
 
+def linear(x):
+    return x
+
 def tanh(x):
     return (np.exp(x) - np.exp(-1*x))/(np.exp(x) + np.exp(-1*x))
 
@@ -163,6 +173,9 @@ def d_leaky_ReLU(x, e):
 
 def d_ReLU(x):
     return np.where(x > 0, 1.0, 0)
+
+def d_linear(x):
+    return 1
 
 def d_tanh(x):
     return 1 - (tanh(x))**2

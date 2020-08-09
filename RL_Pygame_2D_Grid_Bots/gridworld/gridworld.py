@@ -326,9 +326,8 @@ class world():
             state[g.x][g.y] = -2
         for w in self.walls:
             state[w.x][w.y] = -3
-        state[xx][yy] = -1
-        #print(state)
-        #input()
+        state[xx][yy] = 100
+
         return state
 
     '''

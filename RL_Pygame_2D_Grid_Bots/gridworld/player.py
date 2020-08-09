@@ -5,7 +5,7 @@ import numpy as np
 # Get custom classes
 import policy_manager
 from qtable import qtable
-from neural_network import neural_network
+from qnetwork import qnetwork
 
 # Define a class to be used universally by all players, including movable goals
 class player():
@@ -36,16 +36,17 @@ class player():
         self.gamma = 0.1
         self.last_reward = 0
         self.last_action = 0
-        self.current_policy = None
+        self.current_policy = []
 
         # Attempt to get stored learning structures
-        self.qtable, self.neural_network = self.get_player_data()
+        self.qtable, self.qnetwork = self.get_player_data()
 
         # Learning Settings for the agent
         self.use_q_learning = False
-        self.use_nn_approx = True
+        self.use_dqn = True
 
         # Policy Settings for the agent
+        self.use_e_greedy_policy = False
         self.use_normalized_q_table_soft_policy = True
 
     '''
@@ -65,20 +66,25 @@ class player():
                 self.qtable = qtable(5)
 
             # Learn the QTable
-            self.qtable.q_learning(current_state, self.alpha, self.gamma, self.last_reward, self.last_action)
+            self.qtable.q_learning(current_state, self.last_reward, self.last_action, self.alpha, self.gamma)
 
             # Update Policy based on user settings
+            if self.use_e_greedy_policy: self.current_policy = policy_manager.e_greedy_policy(self.qtable.action_values[self.qtable.curr_state_idx])
             if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(self.qtable.action_values[self.qtable.curr_state_idx])
+            print(self.current_policy)
 
-
-        # Artificial Neural Network Value Function Approximation uses the ANN Custom Class Object
-        if self.use_nn_approx:
+        # DQN Method uses the QNetwork Custom Class Object
+        if self.use_dqn:
 
             # Handle First Pass
-            if self.neural_network == None:
-                inputsize = len(np.array(current_state).flatten().tolist())
-                self.neural_network = neural_network([inputsize, np.round(inputsize/2), 5])
-                input()
+            if self.qnetwork == None:
+                self.qnetwork = qnetwork(5, [250, 50, 10, 6])
+
+            # Learn using DQN method
+            self.qnetwork.dqn(np.array(current_state).flatten().tolist(), self.last_reward, self.last_action, self.alpha, self.gamma)
+
+            # Update Policy based on user settings
+            if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(self.qnetwork.action_values)
 
         # Write to player file to save learned states, policies, and Q functions
         self.set_player_data()
@@ -95,6 +101,7 @@ class player():
             cumprobs.append(pol_sum)
 
         # Randomly chose an action based on policy
+        action = 0
         diceroll = np.random.random(1)[0]
         for idx, c in enumerate(cumprobs):
             if diceroll <= c:
@@ -120,8 +127,8 @@ class player():
         try:
             # Read stored player information if it exists
             with open(self.name + ".txt", 'rb') as file:
-                qtable, neural_network = pickle.load(file)
-            return qtable, neural_network
+                qtable, qnetwork = pickle.load(file)
+            return qtable, qnetwork
         except:
             # Initialize empty player information if no file found
             return None, None
@@ -130,7 +137,7 @@ class player():
     def set_player_data(self):
         # Write Player Data to Stored File
         with open(self.name + ".txt", 'wb') as file:
-            pickle.dump((self.qtable, self.neural_network), file)
+            pickle.dump((self.qtable, self.qnetwork), file)
 
     # Quick move function for use in non-visualized training
     def quick_move(self):
