@@ -5,16 +5,15 @@ import numpy as np
 STANDARDIZED POLICY FUNCTIONS
 '''
 
-def e_greedy_policy(action_values):
+def e_greedy_policy(action_values, e = 0.025):
 
     n = len(action_values)
     policy = np.zeros(n)
 
-    e = 0.1
     if np.random.rand() < e:
         policy[np.random.randint(n)] = 1
     else:
-        policy[action_values.index(max(action_values))] = 1
+        policy[np.array(action_values).tolist().index(max(action_values))] = 1
 
     return policy
 
@@ -25,12 +24,12 @@ def normalized_q_table_soft_policy(action_values):
 
     # Initialize an equally-distributed policy
     policy = np.ones(len(action_values))
-    np.true_divide(policy, len(action_values))
+    policy = policy/len(action_values)
 
     # Calculate Normalized Q
     normalized_Q = np.zeros(len(action_values))
     for a in np.arange(len(action_values)):
-        normalized_Q[a] = action_values[a] - min(action_values) + 0.1
+        normalized_Q[a] = action_values[a] - min(action_values)
 
     # Create an E-soft-ish policy
     normalized_sum = sum(normalized_Q)

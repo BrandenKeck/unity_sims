@@ -50,15 +50,15 @@ class world():
         self.player_imgs = None
         self.goal_imgs = None
         self.wall_imgs = None
-    
+
     def run_game(self):
-        
+
         # Initialize game
         pygame.init()
         window = pygame.display.set_mode((self.w, self.h))
         pygame.display.set_caption("gridworld")
         self.set_images()
-        
+
         # Initialize game state
         run = True
 
@@ -145,7 +145,7 @@ class world():
 
             # Loop for player actions
             for p in self.players:
-            
+
                 # Initialize rewards for step
                 player_rewards = 0
 
@@ -153,7 +153,8 @@ class world():
                 prev_gradient_value = self.goal_rewards_gradient[p.x][p.y]
 
                 # Call Learning Functions for Agents
-                p.learn(self.get_current_state(p.x, p.y))
+                p_state = self.get_current_state(p.x, p.y)
+                p.learn(p_state)
                 p.act()
 
                 # Border Collision Penalty
@@ -199,7 +200,7 @@ class world():
                         for pp in self.players:
                             if pp != p and p.team == pp.team:
                                 pp.last_reward = self.team_goal_reward
-                            elif pp != p and p.team != pp.team: 
+                            elif pp != p and p.team != pp.team:
                                 pp.last_reward = self.opponent_goal_penalty
 
                         g.last_reward = self.goal_caught_penalty
@@ -226,7 +227,7 @@ class world():
 
                 # Timestep penalty
                 player_rewards = player_rewards + self.timestep_penalty
-                
+
                 # Update agent reward and previous state
                 p.last_reward = player_rewards
 
@@ -241,7 +242,8 @@ class world():
                     prev_goal_gradient_value = self.goal_repulsion_gradient[g.x][g.y]
 
                     # Call Learning Functions for Agents
-                    g.learn(self.get_current_state(g.x, g.y))
+                    g_state = self.get_current_state(g.x, g.y)
+                    g.learn(g_state)
                     g.act()
 
                     # Player Targeted Penalty
@@ -307,12 +309,12 @@ class world():
             if p.target_x != p.x or p.target_y != p.y: return False
         for g in self.goals:
             if g.target_x != g.x or g.target_y != g.y: return False
-                
+
         return True
 
     # Create 2D list representation of the current state
     def get_current_state(self, xx, yy):
-        
+
         # Get 2d state list
         #     0 -> unoccupied space
         #     -1 -> player position
@@ -326,9 +328,10 @@ class world():
             state[g.x][g.y] = -2
         for w in self.walls:
             state[w.x][w.y] = -3
-        state[xx][yy] = 100
 
-        return state
+        state[xx][yy] = -1
+
+        return np.array(state).flatten().tolist()
 
     '''
     TODO TODO TODO - Consolidate  and Optimize Gradient Functions
@@ -447,7 +450,7 @@ class world():
             p.alpha = val
         for g in self.goals:
             g.alpha = val
-    
+
     def set_global_discount_factor(self, val):
         for p in self.players:
             p.gamma = val
@@ -469,10 +472,10 @@ class world():
         for g in self.goals:
             if g.name == name:
                 g.gamma = val
-    
+
     def set_goal_reward(self, val):
         self.goal_reward = val
-    
+
     def set_goal_gradient_reward_factor(self, val):
         self.goal_gradient_reward_factor = val
 
@@ -484,7 +487,7 @@ class world():
 
     def set_team_goal_reward(self, val):
         self.team_goal_reward = val
-        
+
     def set_opponent_goal_penalty(self, val):
         self.opponent_goal_penalty = val
 

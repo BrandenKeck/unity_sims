@@ -43,11 +43,12 @@ class player():
 
         # Learning Settings for the agent
         self.use_q_learning = False
+        self.use_network_approx = False
         self.use_dqn = True
 
         # Policy Settings for the agent
-        self.use_e_greedy_policy = False
-        self.use_normalized_q_table_soft_policy = True
+        self.use_e_greedy_policy = True
+        self.use_normalized_q_table_soft_policy = False
 
     '''
     BEGIN PRIMARY FUNCTIONS
@@ -57,34 +58,34 @@ class player():
     # Update current policy as a result
     def learn(self, current_state):
 
+        # Handle First Pass for Learning Objects
+        if self.qtable == None: self.qtable = qtable(5)
+        if self.qnetwork == None: self.qnetwork = qnetwork(5, [50, 20, 5])
 
         # Q-Learning Method uses the QTable Custom Class Object
         if self.use_q_learning:
 
-            # Handle First Pass
-            if self.qtable == None:
-                self.qtable = qtable(5)
-
             # Learn the QTable
             self.qtable.q_learning(current_state, self.last_reward, self.last_action, self.alpha, self.gamma)
+            action_values = self.qtable.action_values[self.qtable.curr_state_idx].tolist()
 
-            # Update Policy based on user settings
-            if self.use_e_greedy_policy: self.current_policy = policy_manager.e_greedy_policy(self.qtable.action_values[self.qtable.curr_state_idx])
-            if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(self.qtable.action_values[self.qtable.curr_state_idx])
-            print(self.current_policy)
+        # NN Q-Value approximation uses the QNetwork Class Object
+        if self.use_network_approx:
+
+            # Learn using Neural Network function approximater method
+            self.qnetwork.q_approximater(np.array(current_state).flatten().tolist(), self.last_reward, self.last_action, self.alpha, self.gamma)
+            action_values = self.qnetwork.action_values
 
         # DQN Method uses the QNetwork Custom Class Object
         if self.use_dqn:
 
-            # Handle First Pass
-            if self.qnetwork == None:
-                self.qnetwork = qnetwork(5, [250, 50, 10, 6])
-
             # Learn using DQN method
             self.qnetwork.dqn(np.array(current_state).flatten().tolist(), self.last_reward, self.last_action, self.alpha, self.gamma)
+            action_values = self.qnetwork.action_values
 
-            # Update Policy based on user settings
-            if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(self.qnetwork.action_values)
+        # Update Policy based on user settings
+        if self.use_e_greedy_policy: self.current_policy = policy_manager.e_greedy_policy(action_values)
+        if self.use_normalized_q_table_soft_policy: self.current_policy = policy_manager.normalized_q_table_soft_policy(action_values)
 
         # Write to player file to save learned states, policies, and Q functions
         self.set_player_data()
@@ -135,9 +136,12 @@ class player():
 
     # Store player data for use in subsequent simulations
     def set_player_data(self):
-        # Write Player Data to Stored File
-        with open(self.name + ".txt", 'wb') as file:
-            pickle.dump((self.qtable, self.qnetwork), file)
+        try:
+            # Write Player Data to Stored File
+            with open(self.name + ".txt", 'wb') as file:
+                pickle.dump((self.qtable, self.qnetwork), file)
+        except:
+            pass
 
     # Quick move function for use in non-visualized training
     def quick_move(self):
